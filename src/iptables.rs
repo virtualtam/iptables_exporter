@@ -30,6 +30,18 @@ pub(crate) async fn iptables_save() -> Result<String> {
     .with_context(|| "Failed iptables-save output to valid UTF-8")
 }
 
+pub(crate) async fn iptables_legacy_save() -> Result<String> {
+    String::from_utf8(
+        Command::new("iptables-legacy-save")
+            .arg("-c")
+            .output()
+            .await
+            .with_context(|| "Failed to run iptables-legacy-save")?
+            .stdout,
+    )
+    .with_context(|| "Failed iptables-save output to valid UTF-8")
+}
+
 #[allow(dead_code)]
 #[derive(Copy, Clone, PartialEq, Debug)]
 enum Policy {

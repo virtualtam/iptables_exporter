@@ -20,7 +20,7 @@ mod error;
 mod iptables;
 mod parse;
 
-use iptables::{iptables_save, IptablesState, Metrics};
+use iptables::{iptables_legacy_save, iptables_save, IptablesState, Metrics};
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
@@ -68,7 +68,11 @@ async fn main() {
     while running.load(Ordering::Relaxed) {
         info!("Collecting metrics...");
         let before = Instant::now();
-        let out = unwrap_or_exit!(iptables_save().await);
+        let out = unwrap_or_exit!(if args.legacy {
+            iptables_legacy_save().await
+        } else {
+            iptables_save().await
+        });
         let mut state = IptablesState::new();
         unwrap_or_exit!(state.parse(&*out).await);
 
